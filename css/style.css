@@ -1,0 +1,16 @@
+body { 
+	margin: 0;
+}
+
+canvas {
+	width: 80vw;
+  height: 80vw;
+  max-height: 80vh;
+  max-width: 80vh;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
