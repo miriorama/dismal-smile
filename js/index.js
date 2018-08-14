@@ -1,13 +1,14 @@
-var Engine = Matter.Engine,
-  World = Matter.World,
-  Body = Matter.Body,
-  Bodies = Matter.Bodies,
-  Composite = Matter.Composite,
-  Composites = Matter.Composites,
-  Common = Matter.Common,
-  Events = Matter.Events
-  Vector = Matter.Vector;
-  Svg = Matter.Svg;
+var Engine = Matter.Engine;
+var Render = Matter.Render;
+var World = Matter.World;
+var Body = Matter.Body;
+var Bodies = Matter.Bodies;
+var Composite = Matter.Composite;
+var Runner = Matter.Runner;
+var Common = Matter.Common;
+var Events = Matter.Events;
+var Vector = Matter.Vector;
+var Svg = Matter.Svg;
 
 var width = 500;
 var height = 500;
@@ -16,61 +17,76 @@ var blackStyle = {
   fillStyle: '#000',
   strokeStyle: '#000'
 };
+var yellowStyle = {
+  fillStyle: '#000',
+  strokeStyle: '#000'
+};
 var options = {
+  isStatic: false,
   render: blackStyle,
-  density: 0.0001,
-  friction: 0.2,
+  density: 0.0000001,
+  friction: 0.1,
   restitution: 0.5
 };
 
+var engine = Engine.create();
+engine.world.gravity.y = 0.4;
 
-
-var engine = Engine.create({
-  render: {
-    element: document.getElementById("player"),
-    options: {
-      height: height,
-      width: width,
-      background: '#fff'
-    }
+var render = Render.create({
+  element: document.getElementById("player"),
+  engine: engine,
+  options: {
+    height: height,
+    width: width,
+    background: '#fff',
+    wireframes: false
   }
 });
 
-engine.world.gravity.y = 0.3;
+/*
+var rect = Matter.Bodies.polygon(250, 250, 50, 230, {isStatic: true, render: yellowStyle});
+World.add(engine.world, rect);*/
 
-var rect = Matter.Bodies.rectangle(250, 250, 100, 100, options);
-//World.add(engine.world, rect);
 
 //face
 var face;
-$.get('face.svg').done(function(data) {
+$.get('svg/face.svg').done(function(data) {
   var vertexSets = [];
 
   $(data).find('path').each(function(i, path) {
-    vertexSets.push(Svg.pathToVertices(path, 30));
+    vertexSets.push(Svg.pathToVertices(path, 10));
   });
 
   face = Bodies.fromVertices(250, 250, vertexSets, {
     isStatic: true,
-    //render: blackStyle,
+    render: yellowStyle,
     density: 1
   }, true);
 
   World.add(engine.world, face);
 });
 
-Events.on(engine, 'beforeUpdate', function(event) {
-    Body.setAngularVelocity(face, 0.005);
-    Body.rotate(face, 0.005);
-});
-
-//eye 1
-var eye;
-$.get('eye.svg').done(function(data) {
+//mouth
+var mouth;
+$.get('svg/mouth.svg').done(function(data) {
   var vertexSets = [];
 
   $(data).find('path').each(function(i, path) {
     vertexSets.push(Svg.pathToVertices(path, 10));
+  });
+
+  mouth = Bodies.fromVertices(250, 200, vertexSets, options, true);
+
+  World.add(engine.world, mouth);
+});
+
+//eye 1
+var eye;
+$.get('svg/eye.svg').done(function(data) {
+  var vertexSets = [];
+
+  $(data).find('path').each(function(i, path) {
+    vertexSets.push(Svg.pathToVertices(path, 1));
   });
 
   eye = Bodies.fromVertices(250, 300, vertexSets, options, true);
@@ -80,11 +96,11 @@ $.get('eye.svg').done(function(data) {
 
 //eye 2
 var eye2;
-$.get('eye.svg').done(function(data) {
+$.get('svg/eye.svg').done(function(data) {
   var vertexSets = [];
 
   $(data).find('path').each(function(i, path) {
-    vertexSets.push(Svg.pathToVertices(path, 10));
+    vertexSets.push(Svg.pathToVertices(path, 1));
   });
 
   eye2 = Bodies.fromVertices(200, 300, vertexSets, options, true);
@@ -93,25 +109,17 @@ $.get('eye.svg').done(function(data) {
 });
 
 
-//mouth
-var mouth;
-$.get('mouth.svg').done(function(data) {
-  var vertexSets = [];
 
-  $(data).find('path').each(function(i, path) {
-    vertexSets.push(Svg.pathToVertices(path, 30));
-  });
 
-  mouth = Bodies.fromVertices(250, 200, vertexSets, options, true);
-
-  World.add(engine.world, mouth);
+Events.on(engine, 'beforeUpdate', function(event) {
+  Body.setAngularVelocity(face, 0.005);
+  Body.rotate(face, 0.005);
 });
 
-var renderOptions = engine.render.options;
-renderOptions.wireframes = false;
 
-// run the engine
-Engine.run(engine);
+Render.run(render);
 
+var runner = Runner.create();
+Runner.run(runner, engine);
 
 
